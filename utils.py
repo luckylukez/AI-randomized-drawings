@@ -3,13 +3,29 @@ from matplotlib.animation import FuncAnimation
 import numpy as np
 import random
 
-class Brush():
+from abc import ABC, abstractmethod
+
+class Brush(ABC):
     def __init__(self, x_dim, y_dim):
         self.x_dim = x_dim
         self.y_dim = y_dim
         self.x = random.random()*self.x_dim
         self.y = random.random()*self.y_dim
 
+        self.canvas = None
+
+    @abstractmethod
+    def move(self):
+        pass
+
+    def set_canvas(self, canvas):
+        self.canvas = canvas
+
+    def get_pos(self):
+        return (self.x, self.y)
+    
+class StraightBrush(Brush):
+    
     def move(self):
         self.x = self.x + 0.5        
         self.y = self.y + 0.5
@@ -21,12 +37,6 @@ class Brush():
         if self.y > self.y_dim:
             self.y = self.y - self.y_dim
 
-        return (self.x, self.y)
-
-    def set_canvas(self, canvas):
-        self.canvas = canvas
-
-    def get_pos(self):
         return (self.x, self.y)
 
 
