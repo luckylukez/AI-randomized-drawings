@@ -1,3 +1,4 @@
+[X] Move data storage to brushes
 [ ] Add recording of gifs
 [ ] Add brush interaction capability
 [ ] Add more tests

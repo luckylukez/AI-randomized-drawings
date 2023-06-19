@@ -12,6 +12,10 @@ class Brush(ABC):
         self.x = random.random()*self.x_dim
         self.y = random.random()*self.y_dim
 
+        # These are updated in move()
+        self.x_history = []
+        self.y_history = []
+
         self.canvas = None
 
     @abstractmethod
@@ -31,6 +35,9 @@ class Brush(ABC):
 class StraightBrush(Brush):
     
     def move(self):
+        self.x_history.append(self.x)
+        self.y_history.append(self.y)
+        
         self.x = self.x + 0.5        
         self.y = self.y + 0.5
 
@@ -40,8 +47,6 @@ class StraightBrush(Brush):
 
         if self.y > self.y_dim:
             self.y = self.y - self.y_dim
-
-        return (self.x, self.y)
 
 
 class Painting():
@@ -53,29 +58,26 @@ class Painting():
         for brush in self.brushes:
             brush.set_canvas(self)
 
-        self.data = [[brush.get_pos()] for brush in self.brushes]
-
         # Create empty figure
         self.Figure = plt.figure()
         plt.xlim(0,self.x_dim)
         plt.ylim(0,self.y_dim)
 
     def move_brushes(self):
-        for i, brush in enumerate(self.brushes):
-            (x,y) = brush.move()
-            self.data[i].append((x,y))
+        for brush in self.brushes:
+            brush.move()
 
     def generate_data(self):
         for i in range(self.iterations):
             self.move_brushes()
 
     def plot_data(self):
-        for data_i in self.data:
-            x_values = [data_i[j][0] for j in range(self.iterations)]
-            y_values = [data_i[j][1] for j in range(self.iterations)]
+        for brush in self.brushes:
+            x_values = brush.x_history
+            y_values = brush.y_history
             plt.plot(x_values, y_values)
         plt.gca().set_aspect('equal')
         plt.show()
 
-    def create_video():
-        return None
+    def create_video(self):
+        pass
