@@ -24,6 +24,10 @@ class Brush(ABC):
     def get_pos(self):
         return (self.x, self.y)
     
+    @property
+    def is_out_of_bounds(self):
+        return self.x < 0 or self.y < 0 or self.x > self.x_dim or self.y > self.y_dim
+    
 class StraightBrush(Brush):
     
     def move(self):
@@ -41,7 +45,7 @@ class StraightBrush(Brush):
 
 
 class Painting():
-    def __init__(self, dim, brushes, iterations):
+    def __init__(self, dim, brushes, iterations): 
         self.iterations = iterations
         (self.x_dim, self.y_dim) = dim
 
@@ -49,7 +53,7 @@ class Painting():
         for brush in self.brushes:
             brush.set_canvas(self)
 
-        self.data = [[self.brushes[i].get_pos()] for i in range(len(self.brushes))]
+        self.data = [[brush.get_pos()] for brush in self.brushes]
 
         # Create empty figure
         self.Figure = plt.figure()
@@ -57,8 +61,8 @@ class Painting():
         plt.ylim(0,self.y_dim)
 
     def move_brushes(self):
-        for i in range(len(self.brushes)):
-            (x,y) = self.brushes[i].move()
+        for i, brush in enumerate(self.brushes):
+            (x,y) = brush.move()
             self.data[i].append((x,y))
 
     def generate_data(self):
@@ -66,9 +70,9 @@ class Painting():
             self.move_brushes()
 
     def plot_data(self):
-        for i in range(len(self.brushes)):
-            x_values = [self.data[i][j][0] for j in range(self.iterations)]
-            y_values = [self.data[i][j][1] for j in range(self.iterations)]
+        for data_i in self.data:
+            x_values = [data_i[j][0] for j in range(self.iterations)]
+            y_values = [data_i[j][1] for j in range(self.iterations)]
             plt.plot(x_values, y_values)
         plt.gca().set_aspect('equal')
         plt.show()
