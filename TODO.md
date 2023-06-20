@@ -1,6 +1,6 @@
 [X] Move data storage to brushes
 [ ] Fix exponential time complexity of gif generation
-[ ] Add recording of gifs
+[X] Add recording of gifs
 [ ] Add brush interaction capability
 [ ] Add more tests
 [ ] Add exception handling
