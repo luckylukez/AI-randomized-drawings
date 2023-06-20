@@ -4,7 +4,7 @@ def main():
     x_dim = 100
     y_dim = 100
     dim = (x_dim, y_dim)
-    brushes = [StraightBrush(x_dim, y_dim) for i in range(5)]
+    brushes = [StraightBrush(x_dim, y_dim, brownian_perturbance=True) for i in range(5)]
     iterations = 150
 
     painting = Painting(dim, brushes, iterations)
