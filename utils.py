@@ -1,5 +1,5 @@
 import matplotlib.pyplot as plt
-from matplotlib.animation import FuncAnimation
+from matplotlib.animation import FuncAnimation, PillowWriter
 import numpy as np
 import random
 
@@ -79,5 +79,24 @@ class Painting():
         plt.gca().set_aspect('equal')
         plt.show()
 
-    def create_video(self):
-        pass
+    def generate_gif(self):
+        
+        fig, ax = plt.subplots()
+
+        def animation_function(frame):
+            ax.clear
+            ax.set_xlim(0, self.x_dim)
+            ax.set_ylim(0, self.y_dim)
+            lines = []
+            for brush in self.brushes:
+                x_values = brush.x_history[:frame]
+                y_values = brush.y_history[:frame]
+                line, = ax.plot(x_values, y_values, color='red', lw=2)
+                lines.append(line)
+            if frame%10 == 0:
+                print('-------------------------frame {}-----------------------------'.format(frame))
+            return tuple(lines)
+        
+        ani = FuncAnimation(fig, animation_function, interval=20, blit=True, repeat=True, frames=self.iterations)    
+        ani.save("drawing.gif", dpi=300, writer=PillowWriter(fps=25))
+
