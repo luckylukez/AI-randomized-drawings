@@ -1,4 +1,5 @@
 [X] Move data storage to brushes
+[ ] Add feature for time spent close to same note 
 [ ] Fix exponential time complexity of gif generation
 [X] Add recording of gifs
 [ ] Add brush interaction capability

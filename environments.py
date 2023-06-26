@@ -8,56 +8,57 @@ import numpy as np
 CEG = [261.63, 329.63, 392.00]
 
 class ChordSim(gym.Env):
-    def init(self, dim=[0,500], chord=CEG, reward_func_type='constant', delta_t = 0.01):
+    def init(self, start_pos=261.63, dim=[0,500], chord=CEG, reward_func_type='constant', delta_t = 0.01, a_const=1,
+             reward_radius=10):
         self.dim = dim
         self.chord = chord
         self.stat = self.chord[0]
         self.delta_t = delta_t
-        self.action_space = spaces.Discrete(2)
+        self.reward_radius = reward_radius
+        self.action_space = spaces.Discrete(3)
+        self.a_const = a_const
+        self.a = 0
+        self.v = 0
+        self.x = start_pos
+        self.t = 0
+        self.T = 20 # seconds
 
         match reward_func_type:
-            case 'constant':
-                self.reward_func = lambda x : constant_reward(x, self.chord, self.dim/40)
+            case 'constant': 
+                # This basically converts an external function to a class function
+                self.position_reward_func = lambda : span_constant_reward(self.x, self.chord, self.dim/40)
+        self.edge_punishment = lambda : calc_edge_reward(self.x, self.dim)
+
+    def get_total_reward(self):
+        return (self.position_reward_func(self.x) 
+                + abs(self.v) 
+                + abs(self.a)
+                + self.edge_punishment(self.x))
 
     def step(self, action):
         assert self.action_space.contains(action)
-
         
-    def calc_ball_reward(self):
-        return None
-    
+        
+        self.a = (action - 1) * self.a_const
 
+        next_v = self.v + self.a*self.delta_t
+        avg_v = (self.v + next_v)/2
+        next_x = self.x + avg_v*self.delta_t
 
-class Ball_1D():
-    def __init__(self, mass, start_pos, start_v = (10,0), start_a=(0,0)):
-        self.x, self.y = start_pos
-        self.v_x, self.v_y = start_v
-        self.a_x, self.a_y = start_a
-        self.mass = mass
+        self.v = next_v
+        self.x = next_x
 
-        self.world = None
+        self.t += self.delta_t
+        
+        terminated = self.t >= self.T
 
-        self.dt = 0.01
+        reward = self.calculate_reward()
 
-        self.x_history = [self.x]
-
-    def move(self):
-        self.x = self.x + self.v_x * self.dt
-        self.y = self.y + self.v_y * self.dt
-
-        self.v_x = self.v_x + self.a_x * self.dt
-        self.v_y = self.v_y + self.a_y * self.dt
-
-        self.x_history.append(self.x)
-        self.y_history.append(self.y)
-
+        return (self.state, reward, terminated)
+            
     @property
-    def abs_v(self):
-        return np.abs(self.v)
-    
-    @property
-    def abs_a(self):
-        return np.abs(self.a)
+    def state(self):
+        return (self.x, self.v, self.a)
 
 
 def calc_edge_reward(x, span):
@@ -69,7 +70,7 @@ def calc_edge_reward(x, span):
     else:
         return 0
     
-def constant_reward(x, chord, radius):
+def span_constant_reward(x, chord, radius):
     for note in chord:
         if note > chord-radius and chord < chord+radius:
             return 1
